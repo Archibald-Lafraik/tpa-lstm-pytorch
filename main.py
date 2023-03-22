@@ -22,6 +22,7 @@ import os
 import pandas as pd
 from datetime import date
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class TPALSTM(nn.Module):
 
@@ -45,8 +46,8 @@ class TPALSTM(nn.Module):
         # x = x.view(batch_size, obs_len, 1)
         xconcat = self.relu(self.hidden(x))
 
-        H = torch.zeros(batch_size, obs_len - 1, self.hidden_size)
-        ht = torch.zeros(self.n_layers, batch_size, self.hidden_size)
+        H = torch.zeros(batch_size, obs_len - 1, self.hidden_size).to(device)
+        ht = torch.zeros(self.n_layers, batch_size, self.hidden_size).to(device)
         ct = ht.clone()
         for t in range(obs_len):
             xt = xconcat[:, t, :].view(batch_size, 1, -1)
