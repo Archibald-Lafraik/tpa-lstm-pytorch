@@ -15,7 +15,7 @@ class TPALSTM(pl.LightningModule):
                             bias=True, batch_first=True)  # output (batch_size, obs_len, hidden_size)
         self.hidden_size = hidden_size
         self.filter_num = 32
-        self.filter_size = 1
+        self.filter_size = 1 # Don't change this - otherwise CNN filters no longer 1D
         self.output_horizon = output_horizon
         self.attention = TemporalPatternAttention(self.filter_size, \
                                                   self.filter_num, obs_len - 1, hidden_size)
