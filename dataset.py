@@ -42,9 +42,16 @@ class ElectricityDatasetRaw(Dataset):
 
 
 class ElectricityDataset(Dataset):
-    def __init__(self, mode, split_ratios, window_size):
+    def __init__(self, mode, split_ratios, window_size, data_style):
         self.w_size = window_size
-        self.raw_dataset = np.load('data/dataset_final.npy')
+        
+        if data_style == "pca":
+            self.raw_dataset = np.load('data/dataset_final.npy')
+        elif data_style == "kbest":
+            self.raw_dataset = np.load('data/kbest_dataset.npy')
+        else:
+            print("Invalid dataset type")
+            self.raw_dataset = None
 
         self.train_frac = split_ratios['train']
         self.val_frac = split_ratios['val']
@@ -74,11 +81,12 @@ class ElectricityDataset(Dataset):
 
 
 class ElectricityDataModule(pl.LightningDataModule):
-    def __init__(self, dataset_splits, batch_size=64, window_size=24):
+    def __init__(self, dataset_splits, batch_size=64, window_size=24, data_style="pca"):
         super().__init__()
         self.batch_size = batch_size
         self.dataset_splits = dataset_splits
         self.window_size = window_size
+        self.data_style=data_style
 
 
     def setup(self, stage):
@@ -86,18 +94,22 @@ class ElectricityDataModule(pl.LightningDataModule):
             self.data_train = ElectricityDataset(
                 mode="train",
                 split_ratios=self.dataset_splits,
-                window_size=self.window_size
+                window_size=self.window_size,
+                data_style=self.data_style
             )
             self.data_val = ElectricityDataset(
                 mode="val",
                 split_ratios=self.dataset_splits,
-                window_size=self.window_size
+                window_size=self.window_size,
+                data_style=self.data_style
+
             )
         elif stage == "predict":
             self.data_pred = ElectricityDataset(
                 mode="predict",
                 split_ratios=self.dataset_splits,
-                window_size=self.window_size
+                window_size=self.window_size,
+                data_style=self.data_style
             )
 
     def train_dataloader(self):
