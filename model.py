@@ -80,7 +80,7 @@ class TPALSTM(pl.LightningModule):
         return pred
     
     def configure_optimizers(self):
-        optimiser = optim.Adam(self.parameters(), lr=self.lr)
+        optimiser = optim.Adam(self.parameters(), lr=self.lr, amsgrad=True)
         return optimiser
 
 
