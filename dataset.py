@@ -84,12 +84,15 @@ class ElectricityDataset(Dataset):
     def __getitem__(self, idx):
         return (
             self.X[idx:idx + self.w_size, :], 
-            self.y[idx + self.w_size: idx + self.w_size + self.pred_horizon].squeeze()
+            self.y[idx + self.w_size: idx + self.w_size + self.pred_horizon]
         )
 
     def __len__(self):
         # TODO Check this is correct
         return len(self.dataset) - (self.w_size + self.pred_horizon)
+    
+    def get_input_size(self):
+        return self.dataset.shape[1]
 
 
 class ElectricityDataModule(pl.LightningDataModule):

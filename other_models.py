@@ -45,7 +45,7 @@ class LSTM(pl.LightningModule):
             htt = htt[:, -1, :]
 
         htt = htt.reshape(batch_size, -1)
-        out = self.linear(htt)
+        out = self.linear(htt).unsqueeze(-1)
 
         return out
     
@@ -55,7 +55,7 @@ class LSTM(pl.LightningModule):
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
         # score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
-        score = torch.sqrt(torch.mean(torch.square(outputs - label)))
+        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
 
         self.log("train/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("train/score", score, prog_bar=True, on_epoch=True, on_step=False)
@@ -68,7 +68,7 @@ class LSTM(pl.LightningModule):
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
         # score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
-        score = torch.sqrt(torch.mean(torch.square(outputs - label)))
+        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
 
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("val/score", score, prog_bar=True, on_epoch=True, on_step=False)

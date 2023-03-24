@@ -46,7 +46,7 @@ class TPALSTM(pl.LightningModule):
         # reshape hidden states H
         H = H.view(-1, 1, obs_len - 1, self.hidden_size)
         new_ht = self.attention(H, htt)
-        ypred = self.linear(new_ht)
+        ypred = self.linear(new_ht).unsqueeze(-1)
 
         return ypred
     
@@ -56,7 +56,8 @@ class TPALSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-        score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
+#         score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
+        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
 
         self.log("train/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("train/score", score, prog_bar=True, on_epoch=True, on_step=False)
@@ -68,7 +69,8 @@ class TPALSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-        score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
+#         score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
+        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
 
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("val/score", score, prog_bar=True, on_epoch=True, on_step=False)
