@@ -6,11 +6,20 @@ import lightning.pytorch as pl
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class LSTM(pl.LightningModule):
-    def __init__(self, input_size, lstm_hid_size, linear_hid_size, n_layers=1, lr=1e-3) -> None:
+    def __init__(
+            self,
+            input_size,
+            lstm_hid_size,
+            linear_hid_size,
+            output_horizon=1,
+            n_layers=1,
+            lr=1e-3
+        ) -> None:
         super().__init__()
         self.lr = lr
         self.n_layers = n_layers
         self.lstm_hid_size = lstm_hid_size
+        self.output_horizon = output_horizon
 
         self.lstm = nn.LSTM(input_size, lstm_hid_size, n_layers, \
                             bias=True, batch_first=True) 
@@ -19,7 +28,7 @@ class LSTM(pl.LightningModule):
             nn.Linear(lstm_hid_size, linear_hid_size),
             nn.ReLU(),
             nn.Dropout(p=0.1),
-            nn.Linear(linear_hid_size, 1) 
+            nn.Linear(linear_hid_size, output_horizon) 
         )
         
         self.criterion = nn.MSELoss()

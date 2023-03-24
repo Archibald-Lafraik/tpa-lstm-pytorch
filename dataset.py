@@ -42,8 +42,16 @@ class ElectricityDatasetRaw(Dataset):
 
 
 class ElectricityDataset(Dataset):
-    def __init__(self, mode, split_ratios, window_size, data_style):
+    def __init__(
+            self,
+            mode,
+            split_ratios,
+            window_size,
+            pred_horizon,
+            data_style,
+        ):
         self.w_size = window_size
+        self.pred_horizon = pred_horizon
         
         if data_style == "pca":
             self.raw_dataset = np.load('data/dataset_final.npy')
@@ -74,18 +82,30 @@ class ElectricityDataset(Dataset):
                 .unsqueeze(1).to(self.device)
     
     def __getitem__(self, idx):
-        return self.X[idx:idx + self.w_size, :], self.y[idx + self.w_size]
+        return (
+            self.X[idx:idx + self.w_size, :], 
+            self.y[idx + self.w_size: idx + self.w_size + self.pred_horizon].squeeze()
+        )
 
     def __len__(self):
-        return len(self.dataset) - self.w_size
+        # TODO Check this is correct
+        return len(self.dataset) - (self.w_size + self.pred_horizon)
 
 
 class ElectricityDataModule(pl.LightningDataModule):
-    def __init__(self, dataset_splits, batch_size=64, window_size=24, data_style="pca"):
+    def __init__(
+            self,
+            dataset_splits,
+            batch_size=64,
+            window_size=24,
+            pred_horizon=1,
+            data_style="pca"
+        ):
         super().__init__()
         self.batch_size = batch_size
         self.dataset_splits = dataset_splits
         self.window_size = window_size
+        self.pred_horizon = pred_horizon
         self.data_style=data_style
 
 
@@ -95,12 +115,14 @@ class ElectricityDataModule(pl.LightningDataModule):
                 mode="train",
                 split_ratios=self.dataset_splits,
                 window_size=self.window_size,
+                pred_horizon=self.pred_horizon,
                 data_style=self.data_style
             )
             self.data_val = ElectricityDataset(
                 mode="val",
                 split_ratios=self.dataset_splits,
                 window_size=self.window_size,
+                pred_horizon=self.pred_horizon,
                 data_style=self.data_style
 
             )
@@ -109,6 +131,7 @@ class ElectricityDataModule(pl.LightningDataModule):
                 mode="predict",
                 split_ratios=self.dataset_splits,
                 window_size=self.window_size,
+                pred_horizon=self.pred_horizon,
                 data_style=self.data_style
             )
 
