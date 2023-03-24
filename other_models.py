@@ -33,6 +33,7 @@ class LSTM(pl.LightningModule):
         )
         
         self.criterion = nn.MSELoss()
+        self.save_hyperparameters()
 
     def forward(self, x):
         batch_size, obs_len, f_dim = x.size()

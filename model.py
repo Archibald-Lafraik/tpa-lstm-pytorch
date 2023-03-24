@@ -25,6 +25,8 @@ class TPALSTM(pl.LightningModule):
 
         self.lr = lr
         self.criterion = nn.MSELoss()
+        
+        self.save_hyperparameters()
 
 
     def forward(self, x):
