@@ -18,6 +18,9 @@ def RSE(ypred, ytrue):
             np.sqrt(np.square(ytrue - ytrue.mean()).sum())
     return rse
 
+def RMSE(ypred, ytrue):
+    return torch.sqrt(torch.mean(torch.sum(torch.square(ypred - ytrue), dim=1)))
+
 def quantile_loss(ytrue, ypred, qs):
     '''
     Quantile loss version 2

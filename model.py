@@ -2,6 +2,7 @@ import torch
 from torch import nn, optim
 import lightning.pytorch as pl
 
+from util import RMSE
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -56,8 +57,7 @@ class TPALSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-#         score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
-        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
+        score = RMSE(outputs, label)
 
         self.log("train/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("train/score", score, prog_bar=True, on_epoch=True, on_step=False)
@@ -69,8 +69,7 @@ class TPALSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-#         score = torch.sum(torch.abs(outputs - label)) / torch.sum(torch.abs(torch.mean(label) - label))
-        score = torch.sqrt(torch.mean(torch.sum(torch.square(outputs - label), dim=1)))
+        score = RMSE(outputs, label)
 
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("val/score", score, prog_bar=True, on_epoch=True, on_step=False)
