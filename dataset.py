@@ -57,6 +57,8 @@ class ElectricityDataset(Dataset):
             self.raw_dataset = np.load('data/dataset_final.npy')
         elif data_style == "kbest":
             self.raw_dataset = np.load('data/kbest_dataset.npy')
+        elif data_style == "custom":
+            self.raw_dataset = np.load('data/custom_dataset.npy')
         else:
             print("Invalid dataset type")
             self.raw_dataset = None
