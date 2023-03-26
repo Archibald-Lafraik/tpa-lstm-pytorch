@@ -2,7 +2,7 @@ import torch
 from torch import nn, optim
 import lightning.pytorch as pl
 
-from util import RMSE
+from util import RMSE, RSE, CORR
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -56,10 +56,12 @@ class LSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-        score = RMSE(outputs, label)
+        corr = CORR(outputs, label)
+        rse = RSE(outputs, label)
 
         self.log("train/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
-        self.log("train/score", score, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("train/corr", corr, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("train/rse", rmse, prog_bar=True, on_epoch=True, on_step=False)
 
         return loss
     
@@ -68,10 +70,12 @@ class LSTM(pl.LightningModule):
 
         outputs = self.forward(inputs)
         loss = self.criterion(outputs, label)
-        score = RMSE(outputs, label)
+        corr = CORR(outputs, label)
+        rse = RSE(outputs, label)
 
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
-        self.log("val/score", score, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("val/corr", corr, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("val/rse", rmse, prog_bar=True, on_epoch=True, on_step=False)
 
     def predict_step(self, batch, batch_idx):
         inputs, label = batch 

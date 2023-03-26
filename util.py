@@ -14,12 +14,26 @@ def get_data_path():
     return os.path.join(folder, "data")
 
 def RSE(ypred, ytrue):
-    rse = np.sqrt(np.square(ypred - ytrue).sum()) / \
+    if isinstance(ypred, np.ndarray):
+        rse = np.sqrt(np.square(ypred - ytrue).sum()) / \
             np.sqrt(np.square(ytrue - ytrue.mean()).sum())
+    else:
+        rse = torch.sqrt(torch.square(ypred - ytrue).sum()) / \
+                torch.sqrt(torch.square(ytrue - ytrue.mean()).sum())
     return rse
 
 def RMSE(ypred, ytrue):
     return torch.sqrt(torch.mean(torch.sum(torch.square(ypred - ytrue), dim=1)))
+
+def CORR(ypred, ytrue):
+    if isinstance(ypred, np.ndarray):
+        vx = ypred - np.mean(ypred)
+        vy = ytrue - np.mean(ytrue)
+        return np.sum(vx * vy) / (np.sqrt(np.sum(vx ** 2)) * np.sqrt(np.sum(vy ** 2)))
+    else:
+        vx = ypred - torch.mean(ypred)
+        vy = ytrue - torch.mean(ytrue)
+        return torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
 
 def quantile_loss(ytrue, ypred, qs):
     '''
