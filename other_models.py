@@ -61,7 +61,7 @@ class LSTM(pl.LightningModule):
 
         self.log("train/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("train/corr", corr, prog_bar=True, on_epoch=True, on_step=False)
-        self.log("train/rse", rmse, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("train/rse", rse, prog_bar=True, on_epoch=True, on_step=False)
 
         return loss
     
@@ -75,7 +75,7 @@ class LSTM(pl.LightningModule):
 
         self.log("val/loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         self.log("val/corr", corr, prog_bar=True, on_epoch=True, on_step=False)
-        self.log("val/rse", rmse, prog_bar=True, on_epoch=True, on_step=False)
+        self.log("val/rse", rse, prog_bar=True, on_epoch=True, on_step=False)
 
     def predict_step(self, batch, batch_idx):
         inputs, label = batch 

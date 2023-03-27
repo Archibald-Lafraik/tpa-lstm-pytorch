@@ -53,8 +53,8 @@ class TPALSTM(pl.LightningModule):
         # reshape hidden states H
         H = H.view(-1, 1, obs_len - 1, self.hidden_size)
         new_ht = self.attention(H, htt)
-#         ypred = self.linear(new_ht).unsqueeze(-1)
-        ypred = self.mlp_out(new_ht).unsqueeze(-1)
+        ypred = self.linear(new_ht).unsqueeze(-1)
+#         ypred = self.mlp_out(new_ht).unsqueeze(-1)
 
         return ypred
     

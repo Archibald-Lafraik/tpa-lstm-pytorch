@@ -16,6 +16,7 @@ class LSTNet(pl.LightningModule):
             recc1_out_channels=64, 
             skip=24, 
             skip_reccs_out_channels=4, 
+            output_horizon=1,
             output_out_features=1,
             hw_window_size=7,
             output_fun="sigmoid"
@@ -26,6 +27,7 @@ class LSTNet(pl.LightningModule):
         self.hidR = recc1_out_channels
         self.hidC = conv1_out_channels
         self.hidS = skip_reccs_out_channels
+        self.output_horizon = output_horizon
         self.Ck = conv1_kernel_height
         self.skip = skip
         self.pt = (self.P - self.Ck) // self.skip
@@ -37,9 +39,10 @@ class LSTNet(pl.LightningModule):
             self.GRUskip = nn.GRU(self.hidC, self.hidS)
             self.linear1 = nn.Linear(self.hidR + self.skip * self.hidS, self.num_features)
         else:
-            self.linear1 = nn.Linear(self.hidR, self.num_features)
+#             self.linear1 = nn.Linear(self.hidR, self.num_features)
+            self.linear1 = nn.Linear(self.hidR, output_horizon)
         if (self.hw > 0):
-            self.highway = nn.Linear(self.hw, 1)
+            self.highway = nn.Linear(self.hw * self.num_features, output_horizon)
         self.output = None
         if (output_fun == 'sigmoid'):
             self.output = F.sigmoid
@@ -79,9 +82,9 @@ class LSTNet(pl.LightningModule):
         #highway
         if (self.hw > 0):
             z = x[:, -self.hw:, :]
-            z = z.permute(0,2,1).contiguous().view(-1, self.hw)
+            z = z.view(batch_size, -1)
             z = self.highway(z)
-            z = z.view(-1,self.num_features)
+#             z = z.view(-1, self.output_horizon)
             res = res + z
             
         if (self.output):
@@ -91,9 +94,9 @@ class LSTNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         inputs, label = batch
-        label = label.squeeze()[:, None] 
+        label = label.squeeze()
 
-        outputs = self.forward(inputs)
+        outputs = self.forward(inputs)[:, -1]
         loss = self.criterion(outputs, label)
         corr = CORR(outputs, label)
         rse = RSE(outputs, label)
@@ -106,9 +109,9 @@ class LSTNet(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         inputs, label = batch
-        label = label.squeeze()[:, None] 
+        label = label.squeeze()
 
-        outputs = self.forward(inputs)
+        outputs = self.forward(inputs)[:, -1]
         loss = self.criterion(outputs, label)
         corr = CORR(outputs, label)
         rse = RSE(outputs, label)
@@ -119,8 +122,8 @@ class LSTNet(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         inputs, label = batch 
-        label = label.squeeze()[:, None]
-        pred = self.forward(inputs)
+        label = label.squeeze()
+        pred = self.forward(inputs)[:, -1]
 
         return pred
     
